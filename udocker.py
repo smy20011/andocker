@@ -171,7 +171,7 @@ class Config(object):
     keystore = "keystore"
 
     # for tmp files only
-    tmpdir = "/data/data/com.termux/files/home/uboot/andocker/tmp"
+    tmpdir = "/data/data/com.termux/files/home/andocker/tmp"
 
     # defaults for container execution
     cmd = ["/bin/bash", "-i"]  # Comand to execute
@@ -409,11 +409,16 @@ class Config(object):
             return platform.release()
         except (NameError, AttributeError):
             return "3.2.1"
+    def _safe_int_convert(self, s):
+        try:
+            return int(s)
+        except:
+            return 0
 
     def oskernel_isgreater(self, ref_version):
         """Compare kernel version is greater or equal than ref_version"""
         os_release = self.oskernel().split("-")[0]
-        os_version = [int(x) for x in os_release.split(".")]
+        os_version = [self._safe_int_convert(x) for x in os_release.split(".")]
         for idx in (0, 1, 2):
             if os_version[idx] > ref_version[idx]:
                 return True
@@ -2700,6 +2705,7 @@ class PRootEngine(ExecutionEngineCommon):
 
         # execute
         self._run_banner(self.opt["cmd"][0])
+        print " ".join(cmd_l)
         status = subprocess.call(cmd_l, shell=False, close_fds=True,
                                  env=os.environ.update(self._run_env_get()))
         return status
@@ -3830,12 +3836,13 @@ class ContainerStructure(object):
             cmd += r" --one-file-system --no-same-owner "
             cmd += r"--no-same-permissions --overwrite -f " + tarf
             cmd += r"; find " + destdir
-            cmd += r" \( -type d ! -perm -u=x -exec chmod u+x {} \; \) , "
-            cmd += r" \( ! -perm -u=w -exec chmod u+w {} \; \) , "
-            cmd += r" \( ! -gid " + gid + r" -exec /bin/chgrp " + gid
-            cmd += r" {} \; \) , "
-            cmd += r" \( -name '.wh.*' -exec "
+            cmd += r" \( -type d ! -perm -u=x -exec chmod u+x {} \; \) "
+            cmd += r"; find " + destdir + " \( ! -perm -u=w -exec chmod u+w {} \; \) "
+            cmd += r"; find " + destdir + " \( ! -group " + gid + r" -exec /bin/chgrp " + gid
+            cmd += r" {} \; \) "
+            cmd += r"; find " + destdir + " \( -name '.wh.*' -exec "
             cmd += r" rm -f --preserve-root {} \; \)"
+            print cmd
             status = subprocess.call(cmd, shell=True, stderr=Msg.chlderr,
                                      close_fds=True)
             if status:
