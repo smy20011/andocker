@@ -171,7 +171,7 @@ class Config(object):
     keystore = "keystore"
 
     # for tmp files only
-    tmpdir = "/tmp"
+    tmpdir = "/data/data/com.termux/files/home/uboot/andocker/tmp"
 
     # defaults for container execution
     cmd = ["/bin/bash", "-i"]  # Comand to execute
@@ -886,7 +886,7 @@ class FileUtil(object):
                 Msg().err("Error: deleting file: ", self.filename)
                 return False
         elif os.path.isdir(self.filename):
-            cmd = "/bin/rm -Rf %s || /bin/chmod -R u+w %s && /bin/rm -Rf %s" % \
+            cmd = "rm -Rf %s || chmod -R u+w %s && rm -Rf %s" % \
                   (self.filename, self.filename, self.filename)
             if subprocess.call(cmd, stderr=Msg.chlderr, shell=True,
                                close_fds=True, env=None):
@@ -1283,7 +1283,7 @@ class UdockerTools(object):
         if Msg.level >= Msg.VER:
             cmd += "v"
         cmd += "zf " + tarball_file + " udocker_dir/bin ; "
-        cmd += "/bin/chmod u+rx *"
+        cmd += "chmod u+rx *"
         status = subprocess.call(cmd, shell=True, close_fds=True)
         if status:
             return False
@@ -1292,7 +1292,7 @@ class UdockerTools(object):
         if Msg.level >= Msg.VER:
             cmd += "v"
         cmd += "zf " + tarball_file + " udocker_dir/lib ; "
-        cmd += "/bin/chmod u+rx *"
+        cmd += "chmod u+rx *"
         status = subprocess.call(cmd, shell=True, close_fds=True)
         if status:
             return False
@@ -3830,12 +3830,12 @@ class ContainerStructure(object):
             cmd += r" --one-file-system --no-same-owner "
             cmd += r"--no-same-permissions --overwrite -f " + tarf
             cmd += r"; find " + destdir
-            cmd += r" \( -type d ! -perm -u=x -exec /bin/chmod u+x {} \; \) , "
-            cmd += r" \( ! -perm -u=w -exec /bin/chmod u+w {} \; \) , "
+            cmd += r" \( -type d ! -perm -u=x -exec chmod u+x {} \; \) , "
+            cmd += r" \( ! -perm -u=w -exec chmod u+w {} \; \) , "
             cmd += r" \( ! -gid " + gid + r" -exec /bin/chgrp " + gid
             cmd += r" {} \; \) , "
             cmd += r" \( -name '.wh.*' -exec "
-            cmd += r" /bin/rm -f --preserve-root {} \; \)"
+            cmd += r" rm -f --preserve-root {} \; \)"
             status = subprocess.call(cmd, shell=True, stderr=Msg.chlderr,
                                      close_fds=True)
             if status:
