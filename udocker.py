@@ -171,7 +171,7 @@ class Config(object):
     keystore = "keystore"
 
     # for tmp files only
-    tmpdir = "/data/data/com.termux/files/home/andocker/tmp"
+    tmpdir = "/tmp"
 
     # defaults for container execution
     cmd = ["/bin/bash", "-i"]  # Comand to execute
@@ -239,7 +239,7 @@ class Config(object):
 
     # Pass host env variables
     valid_host_env = ("TERM", "PATH", )
-    invalid_host_env = ("VTE_VERSION", )
+    invalid_host_env = ("VTE_VERSION", "LD_PRELOAD")
 
     # CPU affinity executables to use with: run --cpuset-cpus="1,2,3-4"
     cpu_affinity_exec_tools = (["numactl", "-C", "%s", "--", ],
